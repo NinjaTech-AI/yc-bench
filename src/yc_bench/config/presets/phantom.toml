@@ -1,0 +1,41 @@
+# YC-Bench preset for the Phantom adapter.
+#
+# Inherits the 1-year default benchmark settings and overrides only the agent
+# block so the runtime factory routes to PhantomRuntime (model prefix "phantom/")
+# with production-faithful timeouts.
+
+extends = "default"
+
+name        = "phantom"
+description = "1-year benchmark, driven by Phantom (orchestrator + claude-code -c)."
+
+[agent]
+# "phantom/<inner-model>" — the prefix triggers PhantomRuntime in factory.py;
+# the suffix is passed to claude-code as --model.
+model                    = "phantom/claude-opus-4-7"
+
+# Outer timeout on the orchestrator subprocess. MUST stay strictly greater
+# than the inner claude timeout in run_agent_patch.py (currently 7200s).
+# 8100s = 135 min gives a 15-min grace window so the inner timeout fires
+# first and orchestrator returns cleanly (rc=0), avoiding the grandchild-
+# orphan race that corrupts the bench DB.
+request_timeout_seconds  = 8100.0
+
+# Retry the orchestrator subprocess up to 3 times on failure before marking the
+# run terminal. Backoff is handled inside PhantomRuntime.
+retry_max_attempts       = 3
+retry_backoff_seconds    = 2.0
+
+# Phantom (claude-code) owns its own context window via --continue; the bench's
+# history_keep_rounds is advisory and ignored by PhantomRuntime.
+history_keep_rounds      = 20
+
+# temperature / top_p have no effect on claude-code CLI; kept for schema parity.
+temperature              = 0.0
+top_p                    = 1.0
+
+[loop]
+# No max_turns cap — let phantom play to horizon_end (or bankruptcy).
+# auto_advance_after_turns is moot for phantom (claude doesn't go "quiet"
+# between actions), but kept at the default for completeness.
+auto_advance_after_turns = 5

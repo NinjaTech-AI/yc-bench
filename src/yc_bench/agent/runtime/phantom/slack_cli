@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Wrapper for phantom's slack_interface that uses the YC-Bench-patched SlackClient.
+
+Running `python slack_interface.py read` loads slack_interface as __main__ —
+a separate module from the `slack_interface` our slack_mock patches target,
+so claude's calls would hit the unpatched HTTP layer. This wrapper imports
+slack_interface as a module FIRST (which triggers the patches via the bench's
+sitecustomize chain), then dispatches to its main(). Identical CLI surface.
+
+The bench's slack message tells claude to use `slack_cli <subcmd>` instead
+of `python slack_interface.py <subcmd>`; this wrapper sits in wrapper_bin/
+which is prepended to PATH.
+"""
+
+import sys
+
+# slack_interface is importable because PYTHONPATH (set by PhantomSession)
+# includes phantom's source dir. Importing it triggers slack_mock's install(),
+# which patches SlackClient at module scope.
+import slack_interface
+
+# Fix up argv so slack_interface.main()'s argparse sees the expected layout.
+sys.argv = ["slack_cli", *sys.argv[1:]]
+
+slack_interface.main()

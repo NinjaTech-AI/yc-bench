@@ -6,6 +6,10 @@ from .schemas import RuntimeSettings
 
 
 def build_runtime(settings, command_executor):
+    if settings.model.startswith("phantom/"):
+        from .phantom.runtime import PhantomRuntime
+
+        return PhantomRuntime(settings=settings, command_executor=command_executor)
     return LiteLLMRuntime(
         settings=settings,
         command_executor=command_executor,
