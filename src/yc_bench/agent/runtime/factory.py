@@ -10,6 +10,10 @@ def build_runtime(settings, command_executor):
         from .phantom.runtime import PhantomRuntime
 
         return PhantomRuntime(settings=settings, command_executor=command_executor)
+    if settings.model.startswith("claude-code/"):
+        from .claude_code.runtime import ClaudeCodeRuntime
+
+        return ClaudeCodeRuntime(settings=settings, command_executor=command_executor)
     return LiteLLMRuntime(
         settings=settings,
         command_executor=command_executor,

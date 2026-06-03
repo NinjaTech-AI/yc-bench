@@ -1,0 +1,39 @@
+# YC-Bench preset for the pure Claude Code adapter.
+#
+# Inherits the 1-year default benchmark settings and overrides the agent block
+# so the runtime factory routes to ClaudeCodeRuntime (model prefix "claude-code/").
+# No phantom, no slack — claude is spawned directly per turn.
+
+extends = "default"
+
+name        = "claude_code"
+description = "1-year benchmark, driven directly by Claude Code (no phantom, no slack)."
+
+[agent]
+# "claude-code/<inner-model>" — the prefix triggers ClaudeCodeRuntime in
+# factory.py; the suffix is passed to claude-code as --model (claude resolves
+# this against ANTHROPIC_BASE_URL + ANTHROPIC_AUTH_TOKEN, i.e. our LiteLLM proxy).
+model                    = "claude-code/claude-opus-4-7"
+
+# Timeout on the claude subprocess per turn. Only one subprocess per turn
+# (no orchestrator wrapper), so no inner/outer race; 7200s = 120 min matches
+# the phantom adapter's inner timeout and is enough for claude to play a
+# full 1-year game in one shot.
+request_timeout_seconds  = 7200.0
+
+# Retry the claude subprocess up to 3 times on failure before marking the run
+# terminal. Exponential backoff between attempts (see ClaudeCodeRuntime).
+retry_max_attempts       = 3
+retry_backoff_seconds    = 2.0
+
+# Claude owns its own context window via --continue; the bench's
+# history_keep_rounds is advisory and ignored by ClaudeCodeRuntime.
+history_keep_rounds      = 20
+
+# temperature / top_p have no effect on claude-code CLI; kept for schema parity.
+temperature              = 0.0
+top_p                    = 1.0
+
+[loop]
+# No max_turns cap — let claude play to horizon_end (or bankruptcy).
+auto_advance_after_turns = 5
