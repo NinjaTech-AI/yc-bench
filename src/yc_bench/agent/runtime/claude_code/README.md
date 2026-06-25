@@ -9,15 +9,15 @@ no orchestrator, no Slack. Claude uses its Bash tool to run `yc-bench` commands.
 ## Prerequisites
 
 - `claude` CLI on your `PATH` (`which claude`)
-- LiteLLM proxy running at `http://0.0.0.0:4000`
+- LiteLLM proxy running at `http://0.0.0.0:4000` (chaneg based on your own setting)
 - `uv` installed
 
 ## Run
 
 ```bash
-cd /Users/yu.yan/code/yc-bench
+cd .../code/yc-bench
 
-export ANTHROPIC_BASE_URL=http://0.0.0.0:4000
+export ANTHROPIC_BASE_URL=....
 export ANTHROPIC_AUTH_TOKEN=<your-litellm-key>
 
 uv run yc-bench run \
