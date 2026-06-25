@@ -13,7 +13,7 @@ description = "1-year benchmark, driven directly by Claude Code (no phantom, no 
 # "claude-code/<inner-model>" — the prefix triggers ClaudeCodeRuntime in
 # factory.py; the suffix is passed to claude-code as --model (claude resolves
 # this against ANTHROPIC_BASE_URL + ANTHROPIC_AUTH_TOKEN, i.e. our LiteLLM proxy).
-model                    = "claude-code/claude-opus-4-7"
+model                    = "claude-code/claude-opus-4-8"
 
 # Timeout on the claude subprocess per turn. Only one subprocess per turn
 # (no orchestrator wrapper), so no inner/outer race; 7200s = 120 min matches
