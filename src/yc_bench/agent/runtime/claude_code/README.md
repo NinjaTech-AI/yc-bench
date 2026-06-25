@@ -57,6 +57,21 @@ ps aux | grep '[c]laude -c -p --dangerously' || echo "inner claude gone"
 The `--dangerously` filter targets only the bench agent, leaving any interactive
 `claude` sessions untouched.
 
+## Per-seed isolation (no memory leak between seeds)
+
+Seeds run sequentially, but each is a **fully fresh Claude Code session** — seed 1's
+state cannot leak into seed 2/3:
+
+- Each seed gets its **own `HOME`** at `db/run-<seed>-<model>.claude_code/home/`, so
+  Claude's entire `~/.claude` (session history, config, any `CLAUDE.md` memory) is
+  separate per seed. It also means the inner agent never reads *your* personal
+  `~/.claude` memory.
+- Each seed runs in its **own working directory** (the sandbox), so any file the
+  agent writes stays in that seed's folder.
+- In practice the agent writes **no Claude memory files at all** — it saves notes via
+  `yc-bench scratchpad` (stored in the bench DB), not Claude Code's memory.
+- The only cross-seed-shared surface is a `CLAUDE.md`, but this can only be written by us. 
+
 ## Output
 
 | Path | What |
